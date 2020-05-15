@@ -8,7 +8,7 @@ import UserPermissions from '../utilities/UserPermissions'
 const firebase = require('firebase');
 require("firebase/firestore");
 
-export default class PostScreen extends React.Component {
+export default class PostEvent extends React.Component {
 
     state = {
         text: "",

@@ -1,10 +1,10 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, FlatList } from "react-native";
+import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity } from "react-native";
 import {Icon} from 'native-base'
 import moment from "moment";
 
 // temporary data until we pull from Firebase
-posts = [
+postsLookup = [
     {
         id: "1",
         name: "Raziel Martínez",
@@ -39,25 +39,6 @@ posts = [
         info: "Lamentablemente ya no podemos cuidar de él por lo que lo estamos dando en adopción."
     },
 ];
-//     {
-//         id: "3",
-//         name: "Emerson Parsons",
-//         text:
-//             "Amet mattis vulputate enim nulla aliquet porttitor lacus luctus. Vel elit scelerisque mauris pellentesque pulvinar pellentesque habitant.",
-//         timestamp: 1569109273726,
-//         avatar: require("../assets/tempAvatar.jpg"),
-//         image: require("../assets/tempImage3.jpg")
-//     },
-//     {
-//         id: "4",
-//         name: "Kathie Malone",
-//         text:
-//             "At varius vel pharetra vel turpis nunc eget lorem. Lorem mollis aliquam ut porttitor leo a diam sollicitudin tempor. Adipiscing tristique risus nec feugiat in fermentum.",
-//         timestamp: 1569109273726,
-//         avatar: require("../assets/tempAvatar.jpg"),
-//         image: require("../assets/tempImage4.jpg")
-//     }
-// ];
 
 export default class LookupScreen extends React.Component {
     renderPost = post => {
@@ -103,12 +84,26 @@ export default class LookupScreen extends React.Component {
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Feed</Text>
+                    <Text style={styles.headerTitle}>Adoptar</Text>
+                    <TouchableOpacity style = {styles.screenRefresh}>
+                        <Icon type = "Foundation" name = "refresh" style = {{fontSize: 24, color: "#D8D9DB"}}/>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.postContainer}>
+                    <TouchableOpacity>
+                    <Icon 
+                    type="Ionicons" 
+                    name = "ios-add-circle"
+                    style = {{
+                            fontSize: 32, 
+                            color: "#ccda46",
+                            }}/>
+                    </TouchableOpacity>
                 </View>
 
                 <FlatList
                     style={styles.feed}
-                    data={posts}
+                    data={postsLookup}
                     renderItem={({ item }) => this.renderPost(item)}
                     keyExtractor={item => item.id}
                     showsVerticalScrollIndicator={false}
@@ -125,7 +120,7 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingTop: 20,
-        paddingBottom: 16,
+        paddingBottom: 10,
         backgroundColor: "#FFF",
         alignItems: "center",
         justifyContent: "center",
@@ -177,5 +172,32 @@ const styles = StyleSheet.create({
         height: 300,
         borderRadius: 5,
         marginVertical: 16
+    },
+    postContainer: {
+        paddingTop: 3,
+        paddingBottom: 3,
+        backgroundColor: "#FFF",
+        alignItems: "center",
+        justifyContent: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: "#EBECF4",
+        shadowColor: "#454D65",
+        shadowOffset: { height: 5 },
+        shadowRadius: 15,
+        shadowOpacity: 0.2,
+        zIndex: 10, 
+        flexDirection: "row"
+    },
+    screenRefresh: {
+        top: 20,
+        position: "absolute",
+        right: 24,
+        width: 32,
+        height: 32,
+        justifyContent: "center",
+        alignItems: "center",
+        borderWidth: 2,
+        borderRadius: 50,
+        borderColor: "#D8D9DB"
     }
 });

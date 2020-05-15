@@ -1,5 +1,4 @@
 import React from 'react'
-import FirebaseKeys from "./config"
 import {createAppContainer, createSwitchNavigator} from 'react-navigation'
 import {createStackNavigator} from 'react-navigation-stack'
 import {createBottomTabNavigator} from 'react-navigation-tabs';
@@ -11,16 +10,46 @@ import RegisterScreen from './screens/RegisterScreen'
 
 import HomeScreen from './screens/HomeScreen'
 import LookupScreen from './screens/LookupScreen'
-import PostScreen from './screens/PostScreen'
+import PostEventScreen from './screens/PostEvent'
 import ProfileScreen from './screens/ProfileScreen'
 import SearchScreen from './screens/SearchScreen'
+import CommentsScreen from './screens/CommentsScreen'
+
+
+const HomeStack = createStackNavigator({
+  Home: HomeScreen,
+  PostComments: CommentsScreen,
+  PostEvent: PostEventScreen
+  },
+  {
+    initialRouteName: "Home",
+    headerMode: 'none'
+})
+
+// const PostEventStack = createStackNavigator({
+//   Home: HomeScreen,
+//   PostEvent: PostScreen,
+//   },
+//   {
+//   initialRouteName: "Home",
+//   headerMode: 'none'
+// })
+
+const AuthStack = createStackNavigator({
+    Login: LoginScreen,
+    Register: RegisterScreen,
+  },
+  {
+    initialRouteName: "Login",
+    headerMode: 'none'
+})
 
 const AppContainer = createStackNavigator(
   {
       default: createBottomTabNavigator(
       {
           Home: {
-            screen: HomeScreen,
+            screen: HomeStack,
             navigationOptions: {
               tabBarIcon: ({tintColor}) => <Icon type="Ionicons" name = "ios-home" style = {{fontSize: 24, color: tintColor}}/>
             }
@@ -31,37 +60,25 @@ const AppContainer = createStackNavigator(
               tabBarIcon: ({tintColor}) =>  <Icon type="MaterialCommunityIcons" name = "feature-search-outline" style = {{fontSize: 24, color: tintColor}}/>
             }
           },
-          // Search: {
-          //   screen: SearchScreen,
+          // Post: {
+          //   screen: PostScreen,
           //   navigationOptions: {
-          //     tabBarIcon: ({tintColor}) => <Icon type="MaterialCommunityIcons" name = "feature-search-outline" style = {{fontSize: 24, color: tintColor}}/>
+          //     tabBarIcon: ({tintColor}) => (
+          //         <Icon 
+          //           type="Ionicons" 
+          //           name = "ios-add-circle"
+          //           style = {{
+          //                   fontSize: 48, 
+          //                   color: "#ccda46",
+          //                   }}/>)
           //   }
           // },
-          Post: {
-            screen: PostScreen,
-            navigationOptions: {
-              tabBarIcon: ({tintColor}) => (
-                  <Icon 
-                    type="Ionicons" 
-                    name = "ios-add-circle"
-                    style = {{
-                            fontSize: 48, 
-                            color: "#ccda46",
-                            }}/>)
-            }
-          },
           Search: {
             screen: SearchScreen,
             navigationOptions: {
               tabBarIcon: ({tintColor}) => <Icon type="Ionicons" name = "ios-notifications" style = {{fontSize: 24, color: tintColor}}/>
             }
           },
-          // Loopkup: {
-          //   screen: LookupScreen,
-          //   navigationOptions: {
-          //     tabBarIcon: ({tintColor}) => <Icon type="Ionicons" name = "ios-notifications" style = {{fontSize: 24, color: tintColor}}/>
-          //   }
-          // },
           Profile: {
             screen: ProfileScreen,
             navigationOptions: {
@@ -88,23 +105,12 @@ const AppContainer = createStackNavigator(
       }
     ),
     postModal: {
-        screen: PostScreen
+        screen: PostEventScreen
     }
   },
   {
     mode: "modal",
     headerMode: "none",
-  }
-)
-
-
-const AuthStack = createStackNavigator({
-    Login: LoginScreen,
-    Register: RegisterScreen,
-  },
-  {
-    initialRouteName: "Login",
-    headerMode: 'none'
   }
 )
 
