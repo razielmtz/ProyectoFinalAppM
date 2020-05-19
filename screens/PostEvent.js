@@ -71,10 +71,10 @@ export default class PostEvent extends React.Component {
             <SafeAreaView style = {styles.container}>
                 <View style = {styles.header}>
                     <TouchableOpacity onPress = {() => this.props.navigation.goBack()}>
-                        <Icon type = "Ionicons" name = "md-arrow-back" style = {{fontSize: 24, color: "#D8D9DB"}}/>
+                        <Icon type = "Ionicons" name = "md-arrow-back" style = {{fontSize: 28, color: "##8E8E8E"}}/>
                     </TouchableOpacity>
                     <TouchableOpacity onPress = {this.handlePost}>
-                        <Text style = {{fontWeight: "500"}}>
+                        <Text style = {{fontWeight: "700", fontSize: 17, color: "#8E8E8E"}}>
                             Publicar
                         </Text>
                     </TouchableOpacity>

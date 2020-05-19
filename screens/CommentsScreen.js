@@ -2,6 +2,7 @@ import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Image, FlatList, TextInput} from 'react-native';
 import {Icon} from 'native-base'
 import moment from "moment";
+import Fire from "../Fire";
 
 posts2 = [
     {
@@ -36,14 +37,51 @@ posts2 = [
     },
 ];
 
-export default class CommentsScreen extends React.Component {
+export default class CommentsScreen extends React.Component{
 
     constructor(props){
         super(props);
         this.state = ({
-            posts: [],
-            comments: []
+            post: {},
+            // comments: []
         })
+    }
+
+    componentDidMount() {
+        let post_id = this.props.navigation.getParam('post_id');
+        console.log('THE received post is:  ', post_id); 
+        this.loadPost(post_id);
+    }
+
+    loadPost = post_id => {
+
+        let postData = {};
+
+        var docRef = Fire.shared.firestore.collection("posts").doc(post_id);
+
+        docRef.get().then(doc => {
+            if (doc.exists) {
+                postData = doc.data();
+                console.log("Document data:", postData);
+
+                Fire.shared.firestore
+                        .collection("users")
+                        .doc(postData.uid)
+                        .get()
+                        .then(doc => { 
+                            postData['avatar'] = doc.data().avatar;
+                            postData['name'] = doc.data().name;
+                            this.setState({ 
+                                post: postData
+                            });
+                        }); 
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+            }
+        }).catch(function(error) {
+            console.log("Error getting document:", error);
+        });
     }
 
     renderComments = comment => {
@@ -82,16 +120,16 @@ export default class CommentsScreen extends React.Component {
                 <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                            <Image source={post.avatar} style={styles.avatar} />
+                            <Image source={{uri: this.state.post.avatar}} style={styles.avatar} />
                             <View>
-                                <Text style={styles.name}>{post.name}</Text>
-                                <Text style={styles.timestamp}>{moment(post.timestamp).fromNow()}</Text>
+                                <Text style={styles.name}>{this.state.post.name}</Text>
+                                <Text style={styles.timestamp}>{moment(this.state.post.timestamp).fromNow()}</Text>
                             </View>
                         </View>
                         <Icon type = "Ionicons" name = "ios-more" style = {{fontSize: 24, color: "#73788B"}}/>
                     </View>
-                    <Text style={styles.post}>{post.text}</Text>
-                    <Image source={post.image} style={styles.postImage} resizeMode="cover" />
+                    <Text style={styles.post}>{this.state.post.text}</Text>
+                    <Image source={{uri: this.state.post.image}} style={styles.postImage} resizeMode="cover" />
                     <View style={{ flexDirection: "row", justifyContent: "space-around", borderBottomWidth: StyleSheet.hairlineWidth, paddingBottom: 8 }}>
                         <TouchableOpacity>
                             <Icon type = "Ionicons" name = "ios-heart-empty" style = {{fontSize: 24, color: "#73788B", marginRight: 16}}/>

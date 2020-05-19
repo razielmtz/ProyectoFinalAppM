@@ -28,6 +28,27 @@ class Fire {
         });
     };
 
+    addAdoptionPost = async ({ breed, size, color, age, city, cState, additionalInfo, localUri }) => {
+        const remoteUri = await this.uploadPhotoAsync(localUri, `photos/${this.uid}/${Date.now()}`);
+
+        return new Promise((res, rej) => {
+            this.firestore
+                .collection("adoption_posts")
+                .add({
+                    breed, size, color, age, city, cState, additionalInfo, 
+                    uid: this.uid,
+                    timestamp: this.timestamp,
+                    image: remoteUri
+                })
+                .then(ref => {
+                    res(ref);
+                })
+                .catch(error => {
+                    rej(error);
+                });
+        });
+    };
+
     uploadPhotoAsync = async (uri, filename) => {
         return new Promise(async (res, rej) => {
             const response = await fetch(uri);

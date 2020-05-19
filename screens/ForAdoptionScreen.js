@@ -2,45 +2,49 @@ import React from "react";
 import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity } from "react-native";
 import {Icon} from 'native-base'
 import moment from "moment";
+import Fire from "../Fire";
 
-// temporary data until we pull from Firebase
-postsLookup = [
-    {
-        id: "1",
-        name: "Raziel Martínez",
-        text:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        timestamp: 1569109273726,
-        avatar: require("../assets/raziel.jpeg"),
-        image: require("../assets/bulldogPerdido.jpg"),
-        raza: "Bulldog",
-        tamano: "Mediano",
-        color: "Café",
-        edad: "Entre 3 y 5 años",
-        ciudad: "Ciudad de México",
-        estado: "Perdido",
-        info: "Este perrito fue encontrado por el parque España, traía un collar azul."
+export default class ForAdoptionScreen extends React.Component {
 
-    },
-    {
-        id: "2",
-        name: "Karyn Kim",
-        text:
-            "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-        timestamp: 1569109273726,
-        avatar: require("../assets/tempAvatar.jpg"),
-        image: require("../assets/labradorAdopcion.jpg"),
-        raza: "Labrador",
-        tamano: "Grande",
-        color: "Miel",
-        edad: "2 años",
-        ciudad: "Ciudad de México",
-        estado: "En adpoción",
-        info: "Lamentablemente ya no podemos cuidar de él por lo que lo estamos dando en adopción."
-    },
-];
+    constructor(props){
+        super(props);
+        this.state = ({
+            posts: [],
+            // comments: []
+        })
+    }
 
-export default class LookupScreen extends React.Component {
+    componentDidMount() { 
+        this.loadPosts();
+    }
+
+    loadPosts = () => {
+        const tempPosts = [];
+    
+        Fire.shared.firestore
+            .collection("adoption_posts")
+            .get()
+            .then( snapshot => {
+                snapshot.forEach(docE => {
+                    tempPosts.push(docE.data())
+                });
+
+                tempPosts.forEach(element => {
+                    Fire.shared.firestore
+                        .collection("users")
+                        .doc(element.uid)
+                        .get()
+                        .then(doc => { 
+                            element['avatar'] = doc.data().avatar;
+                            element['name'] = doc.data().name;
+                            this.setState({ 
+                                posts: tempPosts
+                            });
+                        });               
+                });
+            }); 
+    }
+
     renderPost = post => {
         return (
             <View style={styles.feedItem}>
@@ -48,7 +52,7 @@ export default class LookupScreen extends React.Component {
                     <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                         <View>
                             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                <Image source={post.avatar} style={styles.avatar} />
+                                <Image source={{uri: post.avatar}} style={styles.avatar} />
                                 <View>
                                     <Text style={styles.name}>{post.name}</Text>
                                     <Text style={styles.timestamp}>{moment(post.timestamp).fromNow()}</Text>
@@ -59,16 +63,16 @@ export default class LookupScreen extends React.Component {
                     </View>
                     <View  style={{ flexDirection: "row", justifyContent: "space-between"}}>
                         <View style = {{width: "60%"}}>
-                            <Image source={post.image} style={styles.postImage} resizeMode="cover" />
+                            <Image source={{uri: post.image}} style={styles.postImage} resizeMode="cover" />
                         </View>
                         <View style = {{width: "40%", paddingLeft: 16}}>
-                            <Text style={styles.post}>Raza: {post.raza}</Text>
-                            <Text style={styles.post}>Tamaño {post.tamano}</Text>
+                            <Text style={styles.post}>Raza: {post.breed}</Text>
+                            <Text style={styles.post}>Tamaño {post.size}</Text>
                             <Text style={styles.post}>Color: {post.color}</Text>
-                            <Text style={styles.post}>Edad: {post.edad}</Text>
-                            <Text style={styles.post}>Ciudad: {post.ciudad}</Text>
-                            <Text style={styles.post}>Estado: {post.estado}</Text>
-                            <Text style={styles.post}>Información adicional: {post.info}</Text>
+                            <Text style={styles.post}>Edad: {post.age}</Text>
+                            <Text style={styles.post}>Ciudad: {post.city}</Text>
+                            <Text style={styles.post}>Estado: {post.cState}</Text>
+                            <Text style={styles.post}>Información adicional: {post.additionalInfo}</Text>
                         </View>
                     </View>
                     <View style={{ flexDirection: "row" }}>
@@ -85,25 +89,27 @@ export default class LookupScreen extends React.Component {
             <View style={styles.container}>
                 <View style={styles.header}>
                     <Text style={styles.headerTitle}>Adoptar</Text>
-                    <TouchableOpacity style = {styles.screenRefresh}>
+                    <TouchableOpacity onPress = {this.loadPosts} style = {styles.screenRefresh}>
                         <Icon type = "Foundation" name = "refresh" style = {{fontSize: 24, color: "#D8D9DB"}}/>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.postContainer}>
-                    <TouchableOpacity>
-                    <Icon 
-                    type="Ionicons" 
-                    name = "ios-add-circle"
-                    style = {{
-                            fontSize: 32, 
-                            color: "#ccda46",
-                            }}/>
+                    <TouchableOpacity onPress = {() => this.props.navigation.navigate("PostAdoption")}>
+                        <Icon 
+                        type="Ionicons" 
+                        name = "ios-add-circle"
+                        style = {{
+                                fontSize: 32, 
+                                color: "#ccda46",
+                                }}/>
                     </TouchableOpacity>
                 </View>
 
                 <FlatList
                     style={styles.feed}
-                    data={postsLookup}
+                    data={this.state.posts.sort((a, b) => {
+                        return b.timestamp - a.timestamp;
+                      })}
                     renderItem={({ item }) => this.renderPost(item)}
                     keyExtractor={item => item.id}
                     showsVerticalScrollIndicator={false}

@@ -88,7 +88,9 @@ export default class HomeScreen extends React.Component {
             .get()
             .then( snapshot => {
                 snapshot.forEach(docE => {
-                    tempPosts.push(docE.data())
+                    let tempData= docE.data();
+                    tempData.post_id = docE.id;
+                    tempPosts.push(tempData);
                 });
 
                 tempPosts.forEach(element => {
@@ -107,9 +109,8 @@ export default class HomeScreen extends React.Component {
             }); 
     }
 
-    handleComments = post_id => {
-        console.log('THE ID IS: ', post_id)
-        this.props.navigation.navigate("PostComments");
+    handleComments = (post) => {
+        this.props.navigation.navigate("PostComments", {post_id: post.post_id});
     }
 
     renderComments = comment => {
@@ -161,7 +162,7 @@ export default class HomeScreen extends React.Component {
                         <TouchableOpacity>
                             <Icon type = "Ionicons" name = "ios-heart-empty" style = {{fontSize: 24, color: "#73788B", marginRight: 16}}/>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress = {() => this.handleComments(post.name)}>
+                        <TouchableOpacity onPress = {() => this.handleComments(post)}>
                             <Icon type = "Ionicons" name = "ios-chatboxes" style = {{fontSize: 24, color: "#73788B"}}/>
                         </TouchableOpacity>
                     </View>

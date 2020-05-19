@@ -8,32 +8,33 @@ import LoadingScreen from './screens/LoadingScreen'
 import LoginScreen from './screens/LoginScreen'
 import RegisterScreen from './screens/RegisterScreen'
 
-import HomeScreen from './screens/HomeScreen'
-import LookupScreen from './screens/LookupScreen'
+import EventsScreen from './screens/EventsScreen'
+import ForAdoptionScreen from './screens/ForAdoptionScreen'
 import PostEventScreen from './screens/PostEvent'
+import PostAdoptionScreen from './screens/PostAdoption'
 import ProfileScreen from './screens/ProfileScreen'
 import SearchScreen from './screens/SearchScreen'
 import CommentsScreen from './screens/CommentsScreen'
 
 
-const HomeStack = createStackNavigator({
-  Home: HomeScreen,
+const EventsStack = createStackNavigator({
+  Events: EventsScreen,
   PostComments: CommentsScreen,
   PostEvent: PostEventScreen
   },
   {
-    initialRouteName: "Home",
+    initialRouteName: "Events",
     headerMode: 'none'
 })
 
-// const PostEventStack = createStackNavigator({
-//   Home: HomeScreen,
-//   PostEvent: PostScreen,
-//   },
-//   {
-//   initialRouteName: "Home",
-//   headerMode: 'none'
-// })
+const AdoptionStack = createStackNavigator({
+  ForAdoption: ForAdoptionScreen,
+  PostAdoption: PostAdoptionScreen
+  },
+  {
+    initialRouteName: "ForAdoption",
+    headerMode: 'none'
+})
 
 const AuthStack = createStackNavigator({
     Login: LoginScreen,
@@ -48,31 +49,18 @@ const AppContainer = createStackNavigator(
   {
       default: createBottomTabNavigator(
       {
-          Home: {
-            screen: HomeStack,
+          Events: {
+            screen: EventsStack,
             navigationOptions: {
               tabBarIcon: ({tintColor}) => <Icon type="Ionicons" name = "ios-home" style = {{fontSize: 24, color: tintColor}}/>
             }
           },
           Loopkup: {
-            screen: LookupScreen,
+            screen: AdoptionStack,
             navigationOptions: {
               tabBarIcon: ({tintColor}) =>  <Icon type="MaterialCommunityIcons" name = "feature-search-outline" style = {{fontSize: 24, color: tintColor}}/>
             }
           },
-          // Post: {
-          //   screen: PostScreen,
-          //   navigationOptions: {
-          //     tabBarIcon: ({tintColor}) => (
-          //         <Icon 
-          //           type="Ionicons" 
-          //           name = "ios-add-circle"
-          //           style = {{
-          //                   fontSize: 48, 
-          //                   color: "#ccda46",
-          //                   }}/>)
-          //   }
-          // },
           Search: {
             screen: SearchScreen,
             navigationOptions: {
@@ -104,9 +92,9 @@ const AppContainer = createStackNavigator(
         initialRouteName: "Profile"
       }
     ),
-    postModal: {
-        screen: PostEventScreen
-    }
+    // postModal: {
+    //     screen: PostEventScreen
+    // }
   },
   {
     mode: "modal",
