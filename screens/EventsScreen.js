@@ -108,7 +108,6 @@ export default class HomeScreen extends React.Component {
                             if(element.likes.includes(user_id)){
                                 likedPosts.push(element.post_id);
                             }
-                            console.log("LikedPosts", likedPosts);
                             this.setState({ 
                                 posts: tempPosts,
                                 likedPosts
@@ -125,7 +124,6 @@ export default class HomeScreen extends React.Component {
     handleLike = (post) => {
 
         const user_id = Fire.shared.uid;
-        console.log(user_id);
         const tempLikedPosts = this.state.likedPosts;
 
         Fire.shared
@@ -183,6 +181,7 @@ export default class HomeScreen extends React.Component {
     }
 
     renderPost = post => {
+        console.log(post.likes);
         return (
             <View style={styles.feedItem}>
                 <View style={{ flex: 1 }}>
@@ -198,17 +197,35 @@ export default class HomeScreen extends React.Component {
                     </View>
                     <Text style={styles.post}>{post.text}</Text>
                     <Image source={{uri: post.image}} style={styles.postImage} resizeMode="cover" />
-                    <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
-                        {this.state.likedPosts.includes(post.post_id) ? 
-                            <TouchableOpacity onPress = {() => this.handleLike(post)}>
-                                <Icon type = "Ionicons" name = "ios-heart" style = {{fontSize: 24, color: "#DA5148", marginRight: 16}}/>
-                            </TouchableOpacity> :
-                            <TouchableOpacity onPress = {() => this.handleLike(post)}>
-                                <Icon type = "Ionicons" name = "ios-heart-empty" style = {{fontSize: 24, color: "#73788B", marginRight: 16}}/>
-                            </TouchableOpacity>}
-                        <TouchableOpacity onPress = {() => this.handleComments(post)}>
-                            <Icon type = "Ionicons" name = "ios-chatboxes" style = {{fontSize: 24, color: "#73788B"}}/>
-                        </TouchableOpacity>
+                    <View style={{ flexDirection: "row"}}>
+                        <View style = {{flexDirection: "row", alignItems: "center", width: "50%"}}>
+                            <View style = {{justifyContent: "center", alignItems: "flex-end", width: "50%"}}>
+                                {this.state.likedPosts.includes(post.post_id) ? 
+                                <TouchableOpacity onPress = {() => this.handleLike(post)}>
+                                    <Icon type = "Ionicons" name = "ios-heart" style = {{fontSize: 24, color: "#DA5148", marginRight: 16}}/>
+                                </TouchableOpacity> :
+                                <TouchableOpacity onPress = {() => this.handleLike(post)}>
+                                    <Icon type = "Ionicons" name = "ios-heart-empty" style = {{fontSize: 24, color: "#73788B", marginRight: 16}}/>
+                                </TouchableOpacity>}
+                            </View>
+                            <View style = {{justifyContent: "center", alignItems: "flex-start", width: "50%"}}>
+                                {(post.likes !== undefined) ?
+                                    this.state.likedPosts.includes(post.post_id) ?
+                                        post.likes.length > 1 ? 
+                                            <Text style = {{fontSize: 17, fontWeight: "700"}}>Tú + {post.likes.length - 1}</Text>
+                                            :<Text style = {{fontSize: 17, fontWeight: "700"}}>Te gusta</Text>
+                                        :post.likes.length > 0 ? 
+                                            <Text style = {{fontSize: 17, fontWeight: "700"}}>{post.likes.length}</Text>
+                                            :<Text style = {{fontSize: 17, fontWeight: "700"}}></Text>
+                                    :<Text style = {{fontSize: 17, fontWeight: "700"}}></Text> 
+                                }
+                            </View>
+                        </View>
+                        <View style = {{flexDirection: "row", justifyContent: "center", alignItems: "center", width: "50%"}}>
+                            <TouchableOpacity onPress = {() => this.handleComments(post)}>
+                                <Icon type = "Ionicons" name = "ios-chatboxes" style = {{fontSize: 24, color: "#73788B"}}/>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </View>

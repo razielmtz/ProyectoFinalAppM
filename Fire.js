@@ -117,17 +117,52 @@ class Fire {
             if (index > -1) {
                 post_likes.splice(index, 1);
             }
-            console.log("Eliminado ",post_likes)
 
         } else {
             post_likes.push(user_id);
-            console.log("Agregado ", post_likes);
         }
 
         return new Promise((res, rej) => {
             
             this.firestore
                 .collection("posts").doc(post.post_id)
+                .update({
+                    likes: post_likes
+                })
+                .then(ref => {
+                    res(ref);
+                })
+                .catch(error => {
+                    rej(error);
+                });
+        });
+    };
+
+    handlePostAdoptionLikes = async ({ post, user_id }) => {
+        
+        let post_likes;
+
+        if(post.likes){
+            post_likes = post.likes;
+        } else {
+            post_likes = [];
+        }
+
+        if(post_likes.includes(user_id)){
+
+            const index = post_likes.indexOf(user_id);
+            if (index > -1) {
+                post_likes.splice(index, 1);
+            }
+
+        } else {
+            post_likes.push(user_id);
+        }
+
+        return new Promise((res, rej) => {
+            
+            this.firestore
+                .collection("adoption_posts").doc(post.post_id)
                 .update({
                     likes: post_likes
                 })

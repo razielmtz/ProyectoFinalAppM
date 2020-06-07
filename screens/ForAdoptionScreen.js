@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity } from "react-native";
-import {Icon} from 'native-base'
+import { View, Text, StyleSheet, Image,  FlatList, TouchableOpacity, } from "react-native";
+import {Item, Input, Icon, Header} from 'native-base'
 import moment from "moment";
 import Fire from "../Fire";
+import { ThemeColors } from "react-navigation";
 
 export default class ForAdoptionScreen extends React.Component {
 
@@ -10,7 +11,10 @@ export default class ForAdoptionScreen extends React.Component {
         super(props);
         this.state = ({
             posts: [],
-            comments: []
+            comments: [],
+            likedPosts: [],
+            tempData: [],
+            searchTxt: null
         })
     }
 
@@ -20,6 +24,8 @@ export default class ForAdoptionScreen extends React.Component {
 
     loadPosts = () => {
         const tempPosts = [];
+        const likedPosts = [];
+        const user_id = Fire.shared.uid;
     
         Fire.shared.firestore
             .collection("adoption_posts")
@@ -39,8 +45,14 @@ export default class ForAdoptionScreen extends React.Component {
                         .then(doc => { 
                             element['avatar'] = doc.data().avatar;
                             element['name'] = doc.data().name;
+                            if(element.likes.includes(user_id)){
+                                likedPosts.push(element.post_id);
+                            }
+                            console.log("LIKED POSTS: ", likedPosts);
                             this.setState({ 
-                                posts: tempPosts
+                                posts: tempPosts,
+                                tempData: tempPosts,
+                                likedPosts
                             });
                         });               
                 });
@@ -50,6 +62,75 @@ export default class ForAdoptionScreen extends React.Component {
     handleComments = (post) => {
         this.props.navigation.navigate("PostAdoptionComments", {post_id: post.post_id});
     }
+
+    handleLike = (post) => {
+
+        const user_id = Fire.shared.uid;
+        console.log(user_id);
+        const tempLikedPosts = this.state.likedPosts;
+
+        Fire.shared
+                .handlePostAdoptionLikes({
+                             post,
+                             user_id
+                             })
+                .then(ref => {
+                    this.setState({textComment: ""});
+                    this.props.navigation.goBack();
+                    if(this.state.likedPosts.includes(post.post_id)){
+                        const index = tempLikedPosts.indexOf(post.post_id);
+                        if (index > -1) {
+                            tempLikedPosts.splice(index, 1);
+                        }
+                    }else {
+                        tempLikedPosts.push(post.post_id);
+                    }
+                    this.setState({likedPosts: tempLikedPosts});
+                    // this.loadPosts();
+                    console.log("Handled Like successfully");
+                })
+                .catch(error => {
+                    alert(error);
+                });
+
+    }  
+
+    renderHeader = () => {
+        return <Header 
+                    searchBar
+                    rounded 
+                    style = {{backgroundColor: "#F8C072"}}>
+                    <Item>
+                        <Icon name="ios-search" />
+                        <Input 
+                            placeholder="Search" 
+                            value = {this.state.searchTxt}
+                            onChangeText = {this.updateSearch}
+                            />
+                    </Item>
+                </Header>
+    }
+
+    updateSearch = searchTxt => {
+        this.setState({searchTxt}, () => {
+            if('' == searchTxt){
+                this.setState({
+                    posts: [...this.state.tempData]
+                });
+                return;
+            } else {
+                this.state.posts = this.state.tempData
+                .filter(function(item){
+                    return item.breed.toLowerCase().includes(searchTxt.toLowerCase())
+                        || item.size.toLowerCase().includes(searchTxt.toLowerCase())
+                        || item.color.toLowerCase().includes(searchTxt.toLowerCase())
+                        || item.age.toLowerCase().includes(searchTxt.toLowerCase())
+                        || item.city.toLowerCase().includes(searchTxt.toLowerCase())
+                        || item.cState.toLowerCase().includes(searchTxt.toLowerCase());
+                });
+            }
+        });
+    };
 
     renderPost = post => {
         return (
@@ -67,7 +148,7 @@ export default class ForAdoptionScreen extends React.Component {
                         </View>
                         <Icon type = "Ionicons" name = "ios-more" style = {{fontSize: 24, color: "#73788B"}}/>
                     </View>
-                    <View  style={{ flexDirection: "row", justifyContent: "space-between"}}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between"}}>
                         <View style = {{width: "60%"}}>
                             <Image source={{uri: post.image}} style={styles.postImage} resizeMode="cover" />
                         </View>
@@ -106,10 +187,30 @@ export default class ForAdoptionScreen extends React.Component {
                         </View>
                     </View>
                     <View style={{ flexDirection: "row" }}>
-                        <Icon type = "Ionicons" name = "ios-heart-empty" style = {{fontSize: 24, color: "#73788B", marginRight: 16}}/>
-                        <TouchableOpacity onPress = {() => this.handleComments(post)}>
-                            <Icon type = "Ionicons" name = "ios-chatboxes" style = {{fontSize: 24, color: "#73788B"}}/>
-                        </TouchableOpacity>
+                        <View style = {{flexDirection: "row", alignItems: "center", width: "50%"}}>
+                            {this.state.likedPosts.includes(post.post_id) ? 
+                            <TouchableOpacity onPress = {() => this.handleLike(post)}>
+                                <Icon type = "Ionicons" name = "ios-heart" style = {{fontSize: 24, color: "#DA5148", marginRight: 16}}/>
+                            </TouchableOpacity> :
+                            <TouchableOpacity onPress = {() => this.handleLike(post)}>
+                                <Icon type = "Ionicons" name = "ios-heart-empty" style = {{fontSize: 24, color: "#73788B", marginRight: 16}}/>
+                            </TouchableOpacity>}
+                            {(post.likes !== undefined) ?
+                                this.state.likedPosts.includes(post.post_id) ?
+                                    post.likes.length > 1 ? 
+                                        <Text style = {{fontSize: 17, fontWeight: "700"}}>Tú + {post.likes.length - 1}</Text>
+                                        :<Text style = {{fontSize: 17, fontWeight: "700"}}>Te gusta</Text>
+                                    :post.likes.length > 0 ? 
+                                        <Text style = {{fontSize: 17, fontWeight: "700"}}>{post.likes.length}</Text>
+                                        :<Text style = {{fontSize: 17, fontWeight: "700"}}></Text>
+                                :<Text style = {{fontSize: 17, fontWeight: "700"}}></Text> 
+                            }
+                        </View>
+                        <View style = {{width: "50%"}}>
+                            <TouchableOpacity onPress = {() => this.handleComments(post)}>
+                                <Icon type = "Ionicons" name = "ios-chatboxes" style = {{fontSize: 24, color: "#73788B"}}/>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </View>
@@ -136,8 +237,9 @@ export default class ForAdoptionScreen extends React.Component {
                                 }}/>
                     </TouchableOpacity>
                 </View>
-
+                {/* a */}
                 <FlatList
+                    ListHeaderComponent = {this.renderHeader}
                     style={styles.feed}
                     data={this.state.posts.sort((a, b) => {
                         return b.timestamp - a.timestamp;
