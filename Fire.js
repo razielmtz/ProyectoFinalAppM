@@ -28,17 +28,127 @@ class Fire {
         });
     };
 
-    addAdoptionPost = async ({ breed, size, color, age, city, cState, additionalInfo, localUri }) => {
+    addAdoptionPost = async ({ breed, size, color, age, city, cState, additionalInfo, telephone, email, localUri }) => {
         const remoteUri = await this.uploadPhotoAsync(localUri, `photos/${this.uid}/${Date.now()}`);
 
         return new Promise((res, rej) => {
             this.firestore
                 .collection("adoption_posts")
                 .add({
-                    breed, size, color, age, city, cState, additionalInfo, 
+                    breed, size, color, age, city, cState, additionalInfo, telephone, email,
                     uid: this.uid,
                     timestamp: this.timestamp,
                     image: remoteUri
+                })
+                .then(ref => {
+                    res(ref);
+                })
+                .catch(error => {
+                    rej(error);
+                });
+        });
+    };
+
+    addPostComment = async ({ text, post_id, avatar, username }) => {
+
+
+        const newComment = { 
+                             text,
+                             uid: this.uid,
+                             timestamp: this.timestamp,
+                             avatar,
+                             username
+                            };
+
+        return new Promise((res, rej) => {
+            
+            this.firestore
+                .collection("posts").doc(post_id)
+                .update({
+                    comments: firebase.firestore.FieldValue.arrayUnion(newComment)
+                })
+                .then(ref => {
+                    res(ref);
+                })
+                .catch(error => {
+                    rej(error);
+                });
+        });
+    };
+
+    addPostAdoptionComment = async ({ text, post_id, avatar, username }) => {
+        const newComment = { 
+                             text,
+                             uid: this.uid,
+                             timestamp: this.timestamp,
+                             avatar,
+                             username
+                            };
+
+        return new Promise((res, rej) => {
+            
+            this.firestore
+                .collection("adoption_posts").doc(post_id)
+                .update({
+                    comments: firebase.firestore.FieldValue.arrayUnion(newComment)
+                })
+                .then(ref => {
+                    res(ref);
+                })
+                .catch(error => {
+                    rej(error);
+                });
+        });
+    };
+
+    handlePostLikes = async ({ post, user_id }) => {
+        
+        let post_likes;
+
+        if(post.likes){
+            post_likes = post.likes;
+        } else {
+            post_likes = [];
+        }
+
+        if(post_likes.includes(user_id)){
+
+            const index = post_likes.indexOf(user_id);
+            if (index > -1) {
+                post_likes.splice(index, 1);
+            }
+            console.log("Eliminado ",post_likes)
+
+        } else {
+            post_likes.push(user_id);
+            console.log("Agregado ", post_likes);
+        }
+
+        return new Promise((res, rej) => {
+            
+            this.firestore
+                .collection("posts").doc(post.post_id)
+                .update({
+                    likes: post_likes
+                })
+                .then(ref => {
+                    res(ref);
+                })
+                .catch(error => {
+                    rej(error);
+                });
+        });
+    };
+
+    updateUser = async ({ user_id, name, information }) => {
+
+        return new Promise((res, rej) => {
+            
+            this.firestore
+                .collection("users").doc(user_id)
+                .update({
+                    name,
+                    information
                 })
                 .then(ref => {
                     res(ref);
@@ -100,7 +210,7 @@ class Fire {
     signOut = () => {
         firebase.auth().signOut();
     }
-
+    
     get firestore() {
         return firebase.firestore();
     }

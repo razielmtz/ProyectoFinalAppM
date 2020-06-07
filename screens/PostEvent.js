@@ -5,8 +5,8 @@ import Fire from "../Fire";
 import ImagePicker from 'react-native-image-picker';
 import UserPermissions from '../utilities/UserPermissions'
 
-const firebase = require('firebase');
-require("firebase/firestore");
+// const firebase = require('firebase');
+// require("firebase/firestore");
 
 export default class PostEvent extends React.Component {
 
@@ -37,7 +37,8 @@ export default class PostEvent extends React.Component {
     }
 
     handlePost = () => {
-        Fire.shared
+        if(this.state.text != ""){
+            Fire.shared
             .addPost({text: this.state.text.trim(), localUri: this.state.image})
             .then(ref => {
                 this.setState({text: "", image: null});
@@ -46,6 +47,10 @@ export default class PostEvent extends React.Component {
             .catch(error => {
                 alert(error);
             });
+        } else {
+            console.log("Se introdujo un texto vacio");
+        }
+        
     };
 
     pickImage = async () => {

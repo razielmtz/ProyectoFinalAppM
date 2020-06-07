@@ -5,7 +5,8 @@ import Fire from "../Fire";
 export default class ProfileScreen extends React.Component {
 
     state = {
-        user: {}
+        user: {},
+        postsAmount: 0,
     };
 
     unsubscribe = null;
@@ -17,12 +18,42 @@ export default class ProfileScreen extends React.Component {
             .collection("users")
             .doc(user)
             .onSnapshot(doc => {
-                this.setState({ user: doc.data() });
+                this.setState({ user: doc.data()});
             });
+            
+        this.countUserPosts();
     }
 
     componentWillUnmount() {
         this.unsubscribe();
+    }
+    
+    handleEdit = () => {
+        this.props.navigation.navigate("EditProfile", {name: this.state.user.name, information: this.state.information});
+    }
+
+    countUserPosts(){
+
+        const user = this.props.uid || Fire.shared.uid;
+
+        let size = 0;
+
+        Fire.shared.firestore
+            .collection('posts').
+            where('uid', '==', user).
+            get().
+            then(snap => {
+                size = snap.size // will return the collection size
+                });
+
+        Fire.shared.firestore
+            .collection('adoption_posts').
+            where('uid', '==', user).
+            get().
+            then(snap => {
+                size += snap.size // will return the collection size
+                this.setState({postsAmount: size});
+            });
     }
 
     render() {
@@ -44,15 +75,22 @@ export default class ProfileScreen extends React.Component {
                 <View style={styles.infoUserContainer}>
                     <View style={styles.infoContainer}>
                         <Text style={styles.infoTitle}>Sobre mi</Text>
-                        <Text style={styles.info}>Esta es mi información</Text>
+                        <Text style={styles.info}>{this.state.user.information}</Text>
                     </View>
                     <View style={styles.infoContainer}>
-                        <Text style={styles.infoTitle}>3</Text>
+                        <Text style={styles.infoTitle}>{this.state.postsAmount}</Text>
                         <Text style={styles.info}>Publicaciones</Text>
                     </View>
                 </View>
 
 
+                <TouchableOpacity 
+                        style = {styles.button} 
+                        onPress = {() => 
+                            this.handleEdit()
+                        }>
+                    <Text style = {{color: "#FFF", fontSize: 15, fontWeight: "700"}}>Editar Perfil</Text>
+                </TouchableOpacity>
                 <TouchableOpacity 
                         style = {styles.button} 
                         onPress={() => {
@@ -85,7 +123,7 @@ const styles = StyleSheet.create({
     },
     name: {
         marginTop: 24,
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: "600"
     },
     infoUserContainer: {
@@ -112,6 +150,7 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         height: 52,
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        marginTop: 16
     }
 });

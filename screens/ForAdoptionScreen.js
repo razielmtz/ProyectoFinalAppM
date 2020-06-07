@@ -10,7 +10,7 @@ export default class ForAdoptionScreen extends React.Component {
         super(props);
         this.state = ({
             posts: [],
-            // comments: []
+            comments: []
         })
     }
 
@@ -26,7 +26,9 @@ export default class ForAdoptionScreen extends React.Component {
             .get()
             .then( snapshot => {
                 snapshot.forEach(docE => {
-                    tempPosts.push(docE.data())
+                    let tempData= docE.data();
+                    tempData.post_id = docE.id;
+                    tempPosts.push(tempData)
                 });
 
                 tempPosts.forEach(element => {
@@ -43,6 +45,10 @@ export default class ForAdoptionScreen extends React.Component {
                         });               
                 });
             }); 
+    }
+
+    handleComments = (post) => {
+        this.props.navigation.navigate("PostAdoptionComments", {post_id: post.post_id});
     }
 
     renderPost = post => {
@@ -66,18 +72,44 @@ export default class ForAdoptionScreen extends React.Component {
                             <Image source={{uri: post.image}} style={styles.postImage} resizeMode="cover" />
                         </View>
                         <View style = {{width: "40%", paddingLeft: 16}}>
-                            <Text style={styles.post}>Raza: {post.breed}</Text>
-                            <Text style={styles.post}>Tamaño {post.size}</Text>
-                            <Text style={styles.post}>Color: {post.color}</Text>
-                            <Text style={styles.post}>Edad: {post.age}</Text>
-                            <Text style={styles.post}>Ciudad: {post.city}</Text>
-                            <Text style={styles.post}>Estado: {post.cState}</Text>
-                            <Text style={styles.post}>Información adicional: {post.additionalInfo}</Text>
+                            <View style = {styles.fieldContainer}>
+                                <Text style={styles.field}>Raza: </Text>
+                                <Text style={styles.fieldInfo}>{post.breed}</Text>
+                            </View>
+                            <View style = {styles.fieldContainer}>
+                                <Text style={styles.field}>Tamaño: </Text>
+                                <Text style={styles.fieldInfo}>{post.size}</Text>
+                            </View>
+                            <View style = {styles.fieldContainer}>
+                                <Text style={styles.field}>Color: </Text>
+                                <Text style={styles.fieldInfo}>{post.color}</Text>
+                            </View>
+                            <View style = {{flexDirection: "column", marginTop: 12}}>
+                                <Text style={styles.field}>Edad: </Text>
+                                <Text style={styles.fieldInfo}>{post.age}</Text>
+                            </View>
+                            <View style = {styles.fieldContainer}>
+                                <Text style={styles.field}>Ciudad: </Text>
+                                <Text style={styles.fieldInfo}>{post.city}</Text>
+                            </View>
+                            <View style = {styles.fieldContainer}>
+                                <Text style={styles.field}>Estado: </Text>
+                                <Text style={styles.fieldInfo}>{post.cState}</Text>
+                            </View>
+                            { post.telephone || post.email ?
+                            <View style = {{flexDirection: "column", marginTop: 12}}>
+                                <Text style={styles.contact}>Contacto </Text>
+                                {post.telephone ? <Text style={styles.contactInfo}>55 2421 6509</Text> : <Text></Text>}
+                                {post.email ? <Text style={styles.contactInfo}>unemail@gmail.com</Text> : <Text></Text>}
+                            </View> : <View></View>}
+                            {/* <Text style={styles.post}>Información adicional: {post.additionalInfo}</Text> */}
                         </View>
                     </View>
                     <View style={{ flexDirection: "row" }}>
                         <Icon type = "Ionicons" name = "ios-heart-empty" style = {{fontSize: 24, color: "#73788B", marginRight: 16}}/>
-                        <Icon type = "Ionicons" name = "ios-chatboxes" style = {{fontSize: 24, color: "#73788B"}}/>
+                        <TouchableOpacity onPress = {() => this.handleComments(post)}>
+                            <Icon type = "Ionicons" name = "ios-chatboxes" style = {{fontSize: 24, color: "#73788B"}}/>
+                        </TouchableOpacity>
                     </View>
                 </View>
             </View>
@@ -168,10 +200,9 @@ const styles = StyleSheet.create({
         color: "#C4C6CE",
         marginTop: 2
     },
-    post: {
-        marginTop: 16,
-        fontSize: 14,
-        color: "#838899"
+    fieldContainer: {
+        marginTop: 12,
+        flexDirection: "row"
     },
     postImage: {
         width: undefined,
@@ -205,5 +236,24 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderRadius: 50,
         borderColor: "#D8D9DB"
+    },
+    contact: {
+        marginTop: 12,
+        fontSize: 15,
+        color: "#73B8D8",
+        fontWeight: "700"
+    },
+    contactInfo: {
+        fontSize: 14,
+        color: "#73B8D8",
+    },
+    field: {
+        fontSize: 15,
+        color: "#838899",
+        fontWeight: "700"
+    },
+    fieldInfo: {
+        fontSize: 15,
+        color: "#838899",
     }
 });

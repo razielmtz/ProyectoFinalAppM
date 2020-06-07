@@ -5,8 +5,8 @@ import Fire from "../Fire";
 import ImagePicker from 'react-native-image-picker';
 import UserPermissions from '../utilities/UserPermissions'
 
-const firebase = require('firebase');
-require("firebase/firestore");
+// const firebase = require('firebase');
+// require("firebase/firestore");
 
 export default class PostAdoption extends React.Component {
 
@@ -58,6 +58,8 @@ export default class PostAdoption extends React.Component {
         additionalInfo: "",
         image: null,
         user : {},
+        telephone: "",
+        email: ""
     };
 
     // onValueChange(value) {
@@ -87,7 +89,9 @@ export default class PostAdoption extends React.Component {
     }
 
     handlePost = () => {
-        Fire.shared
+
+        if(this.state.telephone != "" || this.state.email != ""){
+            Fire.shared
             .addAdoptionPost({breed: this.state.breed,
                               size: this.state.size,
                               color: this.state.color,
@@ -95,6 +99,8 @@ export default class PostAdoption extends React.Component {
                               city: this.state.city,
                               cState: this.state.cState,
                               additionalInfo: this.state.additionalInfo.trim(), 
+                              telephone: this.state.telephone.trim(),
+                              email: this.state.email.trim(),
                               localUri: this.state.image
                             })
             .then(ref => {
@@ -105,6 +111,8 @@ export default class PostAdoption extends React.Component {
                                city: "CDMX",
                                cState: "CDMX",
                                additionalInfo: "",
+                               telephone: "",
+                               email: "",
                                image: null
                             });
                 this.props.navigation.goBack();
@@ -112,6 +120,9 @@ export default class PostAdoption extends React.Component {
             .catch(error => {
                 alert(error);
             });
+        } else {
+            console.log("Telephone or email was not filled");
+        }
         // console.log(this.state);
     };
 
@@ -272,6 +283,36 @@ export default class PostAdoption extends React.Component {
                             </View>
                         </View>
 
+                        <View style = {styles.inputContainerRow}>
+                            <Text style = {styles.textRequirement}>
+                                Teléfono de contacto
+                            </Text>
+                            <TextInput
+                                autoFocus = {false}
+                                multiline = {true}
+                                numberOfLines = {1}
+                                style = {styles.inputRequirement}
+                                placeholder = "Teléfono del publicador"
+                                onChangeText = {telephone => this.setState({telephone})}
+                                value = {this.state.telephone}
+                            >
+                            </TextInput>
+                        </View>
+                        <View style = {styles.inputContainerRow}>
+                            <Text style = {styles.textRequirement}>
+                                E-mail de contacto
+                            </Text>
+                            <TextInput
+                                autoFocus = {false}
+                                multiline = {true}
+                                numberOfLines = {1}
+                                style = {styles.inputRequirement}
+                                placeholder = "E-mail del publicador"
+                                onChangeText = {email => this.setState({email})}
+                                value = {this.state.email}
+                            >
+                            </TextInput>
+                        </View>
                         <View style = {styles.inputContainerRow}>
                             <Text style = {styles.textRequirement}>
                                 Información Adicional

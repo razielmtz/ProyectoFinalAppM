@@ -13,8 +13,10 @@ import ForAdoptionScreen from './screens/ForAdoptionScreen'
 import PostEventScreen from './screens/PostEvent'
 import PostAdoptionScreen from './screens/PostAdoption'
 import ProfileScreen from './screens/ProfileScreen'
+import EditProfile from './screens/EditProfile'
 import SearchScreen from './screens/SearchScreen'
 import CommentsScreen from './screens/CommentsScreen'
+import CommentsAdoptionScreen from './screens/CommentsAdoptionScreen'
 
 
 const EventsStack = createStackNavigator({
@@ -29,10 +31,20 @@ const EventsStack = createStackNavigator({
 
 const AdoptionStack = createStackNavigator({
   ForAdoption: ForAdoptionScreen,
+  PostAdoptionComments: CommentsAdoptionScreen,
   PostAdoption: PostAdoptionScreen
   },
   {
     initialRouteName: "ForAdoption",
+    headerMode: 'none'
+})
+
+const ProfileStack = createStackNavigator({
+  Profile: ProfileScreen,
+  EditProfile: EditProfile
+  },
+  {
+    initialRouteName: "Profile",
     headerMode: 'none'
 })
 
@@ -68,7 +80,7 @@ const AppContainer = createStackNavigator(
             }
           },
           Profile: {
-            screen: ProfileScreen,
+            screen: ProfileStack,
             navigationOptions: {
               tabBarIcon: ({tintColor}) => <Icon type="Ionicons" name = "ios-person" style = {{fontSize: 24, color: tintColor}}/>
             }
@@ -101,6 +113,8 @@ const AppContainer = createStackNavigator(
     headerMode: "none",
   }
 )
+
+console.disableYellowBox = true;
 
 export default createAppContainer(
   createSwitchNavigator(

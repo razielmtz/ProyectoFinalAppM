@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity } from "react
 import {Icon} from 'native-base'
 import moment from "moment";
 import Fire from "../Fire";
+import { ThemeColors } from "react-navigation";
 
 // temporary data until we pull from Firebase
 posts = [
@@ -72,7 +73,8 @@ export default class HomeScreen extends React.Component {
         super(props);
         this.state = ({
             posts: [],
-            comments: []
+            comments: [],
+            likedPosts: []
         })
     }
 
@@ -82,6 +84,8 @@ export default class HomeScreen extends React.Component {
 
     loadPosts = () => {
         const tempPosts = [];
+        const likedPosts = [];
+        const user_id = Fire.shared.uid;
     
         Fire.shared.firestore
             .collection("posts")
@@ -101,8 +105,13 @@ export default class HomeScreen extends React.Component {
                         .then(doc => { 
                             element['avatar'] = doc.data().avatar;
                             element['name'] = doc.data().name;
+                            if(element.likes.includes(user_id)){
+                                likedPosts.push(element.post_id);
+                            }
+                            console.log("LikedPosts", likedPosts);
                             this.setState({ 
-                                posts: tempPosts
+                                posts: tempPosts,
+                                likedPosts
                             });
                         });               
                 });
@@ -113,8 +122,39 @@ export default class HomeScreen extends React.Component {
         this.props.navigation.navigate("PostComments", {post_id: post.post_id});
     }
 
+    handleLike = (post) => {
+
+        const user_id = Fire.shared.uid;
+        console.log(user_id);
+        const tempLikedPosts = this.state.likedPosts;
+
+        Fire.shared
+                .handlePostLikes({
+                             post,
+                             user_id
+                             })
+                .then(ref => {
+                    this.setState({textComment: ""});
+                    this.props.navigation.goBack();
+                    if(this.state.likedPosts.includes(post.post_id)){
+                        const index = tempLikedPosts.indexOf(post.post_id);
+                        if (index > -1) {
+                            tempLikedPosts.splice(index, 1);
+                        }
+                    }else {
+                        tempLikedPosts.push(post.post_id);
+                    }
+                    this.setState({likedPosts: tempLikedPosts});
+                    // this.loadPosts();
+                    console.log("Handled Like successfully");
+                })
+                .catch(error => {
+                    alert(error);
+                });
+
+    }  
+
     renderComments = comment => {
-        console.log(comment.avatar)
         return(
             <View style={styles.feedItem}>
                 <View style={{ flex: 1 }}>
@@ -159,23 +199,17 @@ export default class HomeScreen extends React.Component {
                     <Text style={styles.post}>{post.text}</Text>
                     <Image source={{uri: post.image}} style={styles.postImage} resizeMode="cover" />
                     <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
-                        <TouchableOpacity>
-                            <Icon type = "Ionicons" name = "ios-heart-empty" style = {{fontSize: 24, color: "#73788B", marginRight: 16}}/>
-                        </TouchableOpacity>
+                        {this.state.likedPosts.includes(post.post_id) ? 
+                            <TouchableOpacity onPress = {() => this.handleLike(post)}>
+                                <Icon type = "Ionicons" name = "ios-heart" style = {{fontSize: 24, color: "#DA5148", marginRight: 16}}/>
+                            </TouchableOpacity> :
+                            <TouchableOpacity onPress = {() => this.handleLike(post)}>
+                                <Icon type = "Ionicons" name = "ios-heart-empty" style = {{fontSize: 24, color: "#73788B", marginRight: 16}}/>
+                            </TouchableOpacity>}
                         <TouchableOpacity onPress = {() => this.handleComments(post)}>
                             <Icon type = "Ionicons" name = "ios-chatboxes" style = {{fontSize: 24, color: "#73788B"}}/>
                         </TouchableOpacity>
                     </View>
-                    {/* <FlatList
-                    style={styles.feed}
-                    data={comments}
-                    renderItem={({ item }) => this.renderComments(item)}
-                    keyExtractor={(item, index) => index}
-                    showsVerticalScrollIndicator={false}
-                    ></FlatList>
-                    <View>
-                        <Text>Adios</Text>
-                    </View> */}
                 </View>
             </View>
         );
@@ -204,6 +238,7 @@ export default class HomeScreen extends React.Component {
 
                 <FlatList
                     style={styles.feed}
+                    extraData={this.state}
                     data={this.state.posts.sort((a, b) => {
                         return b.timestamp - a.timestamp;
                       })}

@@ -4,39 +4,6 @@ import {Icon} from 'native-base'
 import moment from "moment";
 import Fire from "../Fire";
 
-posts2 = 
-    {
-        id: "1",
-        name: "Joe McKay",
-        text:
-            "Este es un post.",
-        timestamp: 1584395010238,
-        avatar: require("../assets/tempAvatar.jpg"),
-        image: require("../assets/tempImage4.jpg"),
-        comments: {
-                data: [
-                {
-                    id: "", //id de publicacion
-                    user_id: "Marco",
-                    text:
-                        "Este es un comentarioooo.",
-                    timestamp: 1584395010239,
-                    avatar: require("../assets/tempAvatar.jpg"),
-                },
-                {
-                    id: "900",
-                    user_id: "Eduardo",
-                    text:
-                        "Este es otro comentario.",
-                    timestamp: 1569109273727,
-                    avatar: require("../assets/defaultImage.png"),
-                }
-                ], 
-            show: false
-        }
-    }
-;
-
 export default class CommentsScreen extends React.Component{
 
     constructor(props){
@@ -68,7 +35,7 @@ export default class CommentsScreen extends React.Component{
 
         let postData = {};
 
-        var docRef = Fire.shared.firestore.collection("posts").doc(post_id);
+        var docRef = Fire.shared.firestore.collection("adoption_posts").doc(post_id);
 
         docRef.get().then(doc => {
             if (doc.exists) {
@@ -102,7 +69,7 @@ export default class CommentsScreen extends React.Component{
         if(this.state.text != ""){
 
             Fire.shared
-                .addPostComment({
+                .addPostAdoptionComment({
                              text: this.state.textComment.trim(),
                              post_id: postid, 
                              avatar: this.state.user.avatar,
@@ -178,16 +145,53 @@ export default class CommentsScreen extends React.Component{
                                 </View>
                                 <Icon type = "Ionicons" name = "ios-more" style = {{fontSize: 24, color: "#73788B"}}/>
                             </View>
-                            <Text style={styles.post}>{this.state.post.text}</Text>
-                            <Image source={{uri: this.state.post.image}} style={styles.postImage} resizeMode="cover" />
-                            {/* <View style={{ flexDirection: "row", justifyContent: "space-around", borderBottomWidth: StyleSheet.hairlineWidth, paddingBottom: 8 }}>
-                                <TouchableOpacity>
-                                    <Icon type = "Ionicons" name = "ios-heart-empty" style = {{fontSize: 24, color: "#73788B", marginRight: 16}}/>
-                                </TouchableOpacity>
-                                <TouchableOpacity >
-                                    <Icon type = "Ionicons" name = "ios-chatboxes" style = {{fontSize: 24, color: "#73788B"}}/>
-                                </TouchableOpacity>
-                            </View> */}
+                            <View style={{ flexDirection: "row", justifyContent: "space-between"}}>
+                                <View style = {{width: "60%"}}>
+                                    <Image source={{uri: this.state.post.image}} style={styles.postImage} resizeMode="cover" />
+                                </View>
+                                <View style = {{width: "40%", paddingLeft: 16}}>
+                                    <View style = {styles.fieldContainer}>
+                                        <Text style={styles.field}>Raza: </Text>
+                                        <Text style={styles.fieldInfo}>{this.state.post.breed}</Text>
+                                    </View>
+                                    <View style = {styles.fieldContainer}>
+                                        <Text style={styles.field}>Tamaño: </Text>
+                                        <Text style={styles.fieldInfo}>{this.state.post.size}</Text>
+                                    </View>
+                                    <View style = {styles.fieldContainer}>
+                                        <Text style={styles.field}>Color: </Text>
+                                        <Text style={styles.fieldInfo}>{this.state.post.color}</Text>
+                                    </View>
+                                    <View style = {{flexDirection: "column", marginTop: 12}}>
+                                        <Text style={styles.field}>Edad: </Text>
+                                        <Text style={styles.fieldInfo}>{this.state.post.age}</Text>
+                                    </View>
+                                    <View style = {styles.fieldContainer}>
+                                        <Text style={styles.field}>Ciudad: </Text>
+                                        <Text style={styles.fieldInfo}>{this.state.post.city}</Text>
+                                    </View>
+                                    <View style = {styles.fieldContainer}>
+                                        <Text style={styles.field}>Estado: </Text>
+                                        <Text style={styles.fieldInfo}>{this.state.post.cState}</Text>
+                                    </View>
+                                    { this.state.post.telephone || this.state.post.email ?
+                                    <View style = {{flexDirection: "column", marginTop: 12}}>
+                                        <Text style={styles.contact}>Contacto </Text>
+                                        {this.state.post.telephone ? <Text style={styles.contactInfo}>55 2421 6509</Text> : <Text></Text>}
+                                        {this.state.post.email ? <Text style={styles.contactInfo}>unemail@gmail.com</Text> : <Text></Text>}
+                                    </View> : <View></View>}
+                                    
+                                </View>
+                            </View>
+                            <View style={{ flexDirection: "row", justifyContent: "space-around", borderBottomWidth: StyleSheet.hairlineWidth, paddingBottom: 8 }}>
+                                { this.state.post.additionalInfo ?
+                                <View>
+                                    <View style = {styles.additionalContainer}>
+                                        <Text style={styles.field}>Información adicional: </Text>
+                                        <Text style={styles.fieldInfo}>{this.state.post.additionalInfo}</Text>
+                                    </View> 
+                                </View>: <View></View>}
+                            </View>
                             <View style = {styles.newCommentContainer}>
                                 <TextInput
                                     // autoFocus = {true}
@@ -210,14 +214,11 @@ export default class CommentsScreen extends React.Component{
                                 </TouchableOpacity>
                             </View>
                             <FlatList
-                                style={styles.commentsFeed}
-                                data={this.state.post.comments}
-                                // data={posts2.comments.data.sort((a, b) => {
-                                //     return a.timestamp - b.timestamp;
-                                //   })}
-                                renderItem={({ item }) => this.renderComments(item)}
-                                keyExtractor={(item, index) => index}
-                                showsVerticalScrollIndicator={true}
+                            style={styles.commentsFeed}
+                            data={this.state.post.comments}
+                            renderItem={({ item }) => this.renderComments(item)}
+                            keyExtractor={(item, index) => index}
+                            showsVerticalScrollIndicator={true}
                             ></FlatList>
                         </View>
                     </View>
@@ -355,5 +356,32 @@ const styles = StyleSheet.create({
         width: "10%",
         justifyContent: "flex-end",
         alignItems: "center"
+    },
+    fieldContainer: {
+        marginTop: 12,
+        flexDirection: "row"
+    },
+    contact: {
+        marginTop: 12,
+        fontSize: 15,
+        color: "#73B8D8",
+        fontWeight: "700"
+    },
+    contactInfo: {
+        fontSize: 14,
+        color: "#73B8D8",
+    },
+    field: {
+        fontSize: 15,
+        color: "#838899",
+        fontWeight: "700"
+    },
+    fieldInfo: {
+        fontSize: 15,
+        color: "#838899",
+    },
+    additionalContainer: {
+        alignItems: "center",
+        flexDirection: "column"
     }
 });
