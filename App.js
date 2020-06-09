@@ -73,12 +73,12 @@ const AppContainer = createStackNavigator(
               tabBarIcon: ({tintColor}) =>  <Icon type="MaterialCommunityIcons" name = "feature-search-outline" style = {{fontSize: 24, color: tintColor}}/>
             }
           },
-          Search: {
-            screen: SearchScreen,
-            navigationOptions: {
-              tabBarIcon: ({tintColor}) => <Icon type="Ionicons" name = "ios-notifications" style = {{fontSize: 24, color: tintColor}}/>
-            }
-          },
+          // Search: {
+          //   screen: SearchScreen,
+          //   navigationOptions: {
+          //     tabBarIcon: ({tintColor}) => <Icon type="Ionicons" name = "ios-notifications" style = {{fontSize: 24, color: tintColor}}/>
+          //   }
+          // },
           Profile: {
             screen: ProfileStack,
             navigationOptions: {

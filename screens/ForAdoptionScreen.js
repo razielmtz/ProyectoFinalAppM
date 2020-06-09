@@ -103,7 +103,7 @@ export default class ForAdoptionScreen extends React.Component {
                     <Item>
                         <Icon name="ios-search" />
                         <Input 
-                            placeholder="Search" 
+                            placeholder="Buscar" 
                             value = {this.state.searchTxt}
                             onChangeText = {this.updateSearch}
                             />
